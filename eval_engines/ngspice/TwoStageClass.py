@@ -102,6 +102,7 @@ class TwoStageClass(NgSpiceWrapper):
             #     return xstart
             return xstop, False
 
+# This class is not used anywhere else!
 class TwoStageMeasManager(object):
 
     def __init__(self, design_specs_fname):
