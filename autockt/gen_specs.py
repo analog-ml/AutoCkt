@@ -82,6 +82,9 @@ def main():
 
     gen_data(CIR_YAML, "two_stage_opamp", int(args.num_specs))
 
+    CIR_YAML = "eval_engines/ngspice/ngspice_inputs/yaml_files/ledro_d_fc.yaml"
+    gen_data(CIR_YAML, "ledro_d_fc", int(args.num_specs))
+
 
 if __name__ == "__main__":
     main()
