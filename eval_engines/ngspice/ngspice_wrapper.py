@@ -11,7 +11,10 @@ import time
 import pprint
 import yaml
 import IPython
+from jinja2 import Template
+
 debug = False
+
 
 class NgSpiceWrapper(object):
 
@@ -23,11 +26,19 @@ class NgSpiceWrapper(object):
         else:
             self.root_dir = root_dir
 
-        with open(yaml_path, 'r') as f:
+        with open(yaml_path, "r") as f:
             yaml_data = yaml.load(f)
-        design_netlist = yaml_data['dsn_netlist']
-        design_netlist = path+'/'+design_netlist
- 
+        design_netlist = yaml_data["dsn_netlist"]
+        design_netlist = path + "/" + design_netlist
+        if not os.path.isfile(design_netlist):
+            raise FileNotFoundError(
+                "Design netlist file does not exist: %s" % design_netlist
+            )
+        self.design_netlist = design_netlist
+        with open(design_netlist, "r") as f:
+            self.netlist_str = f.read()
+            self.design_template = Template(self.netlist_str)
+
         _, dsg_netlist_fname = os.path.split(design_netlist)
         self.base_design_name = os.path.splitext(dsg_netlist_fname)[0]
         self.num_process = num_process
