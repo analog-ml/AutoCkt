@@ -12,6 +12,7 @@ import pprint
 import yaml
 import IPython
 from jinja2 import Template
+import shutil
 
 debug = False
 
@@ -126,6 +127,7 @@ class NgSpiceWrapper(object):
         design_folder, fpath = self.create_design(state, dsn_name)
         info = self.simulate(fpath)
         specs = self.translate_result(design_folder)
+        shutil.rmtree(design_folder)  # clean up
         return state, specs, info
 
     def run(self, states, design_names=None, verbose=False):
