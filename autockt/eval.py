@@ -18,6 +18,34 @@ from ray.tune.registry import register_env
 
 # from bag_deep_ckt.autockt.envs.bag_opamp_discrete import TwoStageAmp
 from envs.ngspice_vanilla_opamp import TwoStageAmp
+from envs.ngspice_ledro_d_fc import LEDRO_D_FC
+
+from loguru import logger
+import sys
+
+# Custom format string
+log_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level: <8}</level> | "
+    "<cyan>{module}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+    "<level>{message}</level>"
+)
+
+# Clear default logger
+logger.remove()
+
+# Log to stdout
+logger.add(sys.stdout, format=log_format, level="DEBUG")
+
+# Log to file with rotation and retention
+logger.add(
+    "logs/eval.log",
+    format=log_format,
+    level="DEBUG",
+    rotation="1 day",
+    retention="7 days",
+)
+
 
 EXAMPLE_USAGE = """
 Example Usage via RLlib CLI:
@@ -33,6 +61,7 @@ Example Usage via executable:
 # ModelCatalog.register_custom_model("pa_model", ParametricActionsModel)
 # register_env("pa_cartpole", lambda _: ParametricActionCartpole(10))
 register_env("opamp-v0", lambda config: TwoStageAmp(config))
+register_env("ledro_d_fc", lambda config: LEDRO_D_FC(config))
 
 
 def create_parser(parser_creator=None):
@@ -145,6 +174,9 @@ def rollout(agent, env_name, num_steps, out="assdf", no_render=True):
         }
         if env_name == "opamp-v0":
             env = TwoStageAmp(env_config=env_config)
+        if env_name == "ledro_d_fc":
+            env = LEDRO_D_FC(env_config=env_config)
+
     else:
         env = gym.make(env_name)
 
@@ -186,10 +218,21 @@ def rollout(agent, env_name, num_steps, out="assdf", no_render=True):
                 action = agent.compute_action(state)
                 action_array.append(action)
 
+            # action = env.action_space.sample()
+            # action_array.append(action)
+
             next_state, reward, done, _ = env.step(action)
-            print(action)
-            print(reward)
-            print(done)
+            logger.debug(
+                "\n action: "
+                + str(action)
+                + "\n reward: "
+                + str(reward)
+                + "\n done: "
+                + str(done)
+                + "\n next_state: "
+                + str(next_state)
+            )
+
             reward_total += reward
             if not no_render:
                 env.render()
