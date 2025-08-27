@@ -9,19 +9,19 @@ params:
   mp4:  !!python/tuple [1, 100, 100]
   mp5:  !!python/tuple [1, 100, 100]
   mp6:  !!python/tuple [1, 100, 100]
-  vbiasp1: !!python/tuple [!!float 1, !!float 12, 20]
-  vbiasp2: !!python/tuple [!!float 1, !!float 12, 20]
-  vbiasn0: !!python/tuple [!!float 1, !!float 12, 20]
-  vbiasn1: !!python/tuple [!!float 1, !!float 12, 20]
-  vbiasn2: !!python/tuple [!!float 1, !!float 12, 20]
+  vbiasp1: !!python/tuple [!!float 0, !!float 12, 20]
+  vbiasp2: !!python/tuple [!!float 0, !!float 12, 20]
+  vbiasn0: !!python/tuple [!!float 0, !!float 12, 20]
+  vbiasn1: !!python/tuple [!!float 0, !!float 12, 20]
+  vbiasn2: !!python/tuple [!!float 0, !!float 12, 20]
 
 
 #Every specification output will be normlaized in the order of (gain, ibias, pm, ugbw)
-normalize: !!python/tuple [!!float 20.0e+6,3300,!!float 10e-6,60]
+normalize: !!python/tuple [3300, !!float 10e-6, 70, !!float 20.0e+6]
 
 #during training, at reset a specification will be chosen at random between [min,max,#]
 target_specs:
-  gain_min: !!python/tuple [3000,3300]
-  ugbw_min: !!python/tuple [!!float 3.0e+5, !!float 20.0e+6]
-  phm_min: !!python/tuple [60,60.0000001]
-  ibias_max: !!python/tuple [10e-8, 10e-6]
+  gain_min: !!python/tuple [1,3300]
+  ugbw_min: !!python/tuple [!!float 1.0e+6, !!float 20.0e+6]
+  phm_min: !!python/tuple [70,70.0000001]
+  ibias_max: !!python/tuple [1e-6, 10e-6]
