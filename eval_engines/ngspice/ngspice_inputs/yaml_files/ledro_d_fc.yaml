@@ -15,11 +15,11 @@ params:
   nA4:  !!python/tuple [!!float 10, !!float 400, 100]
   nA5:  !!python/tuple [!!float 10, !!float 400, 100]
   nA6:  !!python/tuple [!!float 10, !!float 400, 100]
-  vbiasp1: !!python/tuple [!!float 0, !!float 12, 100]
-  vbiasp2: !!python/tuple [!!float 0, !!float 12, 100]
-  vbiasn0: !!python/tuple [!!float 0, !!float 12, 100]
-  vbiasn1: !!python/tuple [!!float 0, !!float 12, 100]
-  vbiasn2: !!python/tuple [!!float 0, !!float 12, 100]
+  vbiasp1: !!python/tuple [!!float 0, !!float 0.8, 100]
+  vbiasp2: !!python/tuple [!!float 0, !!float 0.8, 100]
+  vbiasn0: !!python/tuple [!!float 0, !!float 0.8, 100]
+  vbiasn1: !!python/tuple [!!float 0, !!float 0.8, 100]
+  vbiasn2: !!python/tuple [!!float 0, !!float 0.8, 100]
 
 
 #Every specification output will be normlaized in the order of (gain, ibias, pm, ugbw)
