@@ -93,7 +93,7 @@ write output.log I(V0) @nm0[gm] @nm0[ids] @nm0[vth] vgs_nm0 vds_nm0
 + @nm10[gm] @nm10[ids] @nm10[vth] vgs_nm10 vds_nm10
 
 
-ac dec 10 1 10G
+ac dec 10 1 100G
 run
 set units=degrees
 set wr_vecnames
