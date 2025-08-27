@@ -73,6 +73,13 @@ def gen_data(CIR_YAML, env, num_specs):
     with open("autockt/gen_specs/ngspice_specs_gen_" + env, "wb") as f:
         pickle.dump(specs_range, f)
 
+    with open("autockt/gen_specs/ngspice_specs_gen_" + env + ".log", "w") as f:
+        f.write("total specs: " + str(len(specs_range)))
+        for spec in specs_range:
+            f.write("\n")
+            f.write(str(spec) + "\n")
+            f.write(str(specs_range[spec]))
+
 
 def main():
     parser = argparse.ArgumentParser()
