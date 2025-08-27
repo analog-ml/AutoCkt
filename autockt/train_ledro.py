@@ -13,34 +13,10 @@ ray.init()
 
 # configures training of the agent with associated hyperparameters
 # See Ray documentation for details on each parameter
-config_train = {
-    # "sample_batch_size": 200,
-    "train_batch_size": 2400,
-    # "sgd_minibatch_size": 1200,
-    # "num_sgd_iter": 3,
-    # "lr":1e-3,
-    # "vf_loss_coeff": 0.5,
-    "horizon": 400,
-    # "rollout_fragment_length": 1200,
-    # "rollout_fragment_length": 200,
-    "num_gpus": 0,
-    "model": {"fcnet_hiddens": [64, 64]},
-    "num_workers": 6,
-    "env_config": {"generalize": True, "run_valid": False},
-}
-config_train = {
-    "train_batch_size": 1200,
-    "horizon": 100,
-    "num_gpus": 0,
-    # "model": {"fcnet_hiddens": [64, 64]},
-    "model": {"fcnet_hiddens": [128, 128, 128]},
-    "num_workers": 6,
-    "env_config": {"generalize": True, "run_valid": False},
-}
 
 config_train = {
     "train_batch_size": 1200,
-    "horizon": 200,
+    "horizon": 200,  # 100 discrete values, starting from 33 (envs/ngspice_ledro_d_dc.py line 210), max step size = 2, -> 33 + 2*200 = 433.
     "num_gpus": 0,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
@@ -53,24 +29,15 @@ config_train = {
 if True:
     trials = tune.run_experiments(
         {
-            "train_7nFinFET_LEDRO_D_DC_1": {
+            "train_7nFinFET_LEDRO_D_FC": {
                 "checkpoint_freq": 10,
                 "run": "PPO",
                 "env": LEDRO_D_FC,
-                # "stop": {"episode_reward_mean": -0.02},
-                # "stop": {"episode_reward_mean": -0.25},
+                "stop": {"episode_reward_mean": -0.02},
                 "config": config_train,
             },
         }
     )
-    # trials = tune.run(
-    #     "PPO",
-    #     config=config_train,
-    #     stop={"training_iteration": 1000},
-    #     checkpoint_freq=10,
-    #     name="train_7nFinFET_LEDRO_D_DC_1",
-    # )
-
 else:
     print("RESTORING NOW!!!!!!")
     exit()  # do not restore for now
