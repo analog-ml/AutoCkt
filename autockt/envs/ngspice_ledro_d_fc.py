@@ -25,6 +25,33 @@ from eval_engines.ngspice.TwoStageClass import *
 from eval_engines.ngspice.LEDRO_D_FC import *
 
 
+from loguru import logger
+import sys
+
+# Custom format string
+log_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level: <8}</level> | "
+    "<cyan>{module}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+    "<level>{message}</level>"
+)
+
+# Clear default logger
+logger.remove()
+
+# Log to stdout
+logger.add(sys.stdout, format=log_format, level="DEBUG")
+
+# Log to file with rotation and retention
+logger.add(
+    "logs/ngspice_ledro_d_fc45.log",
+    format=log_format,
+    level="DEBUG",
+    rotation="1 day",
+    retention="7 days",
+)
+
+
 # way of ordering the way a yaml file is read
 class OrderedDictYAMLLoader(yaml.Loader):
     """
