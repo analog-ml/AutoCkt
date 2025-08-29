@@ -16,11 +16,11 @@ ray.init()
 
 config_train = {
     "train_batch_size": 1200,
-    "horizon": 200,  # 100 discrete values, starting from 33 (envs/ngspice_ledro_d_dc.py line 210), max step size = 2, -> 33 + 2*200 = 433.
+    "horizon": 50,  # 100 discrete values, starting from 33 (envs/ngspice_ledro_d_dc.py line 210), max step size = 2, -> 33 + 2*200 = 433.
     "num_gpus": 0,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
-    "num_workers": 6,
+    "num_workers": 3,
     "env_config": {"generalize": True, "run_valid": False},
 }
 
