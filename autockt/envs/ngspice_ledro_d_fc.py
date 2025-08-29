@@ -240,7 +240,6 @@ class LEDRO_D_FC(gym.Env):
             [0] * len(self.params_id),
             [(len(param_vec) - 1) for param_vec in self.params],
         )
-        print("***cur params idx:", self.cur_params_idx)
 
         # Get current specs and normalize
         self.cur_specs = self.update(self.cur_params_idx)
@@ -262,6 +261,7 @@ class LEDRO_D_FC(gym.Env):
             [cur_spec_norm, self.specs_ideal_norm, self.cur_params_idx]
         )
         self.env_steps = self.env_steps + 1
+        print("***cur params idx:", self.cur_params_idx, "specs: ", self.cur_specs, " reward: ", reward)
 
         # print('cur ob:' + str(self.cur_specs))
         # print('ideal spec:' + str(self.specs_ideal))
@@ -277,19 +277,37 @@ class LEDRO_D_FC(gym.Env):
         """
         Reward: doesn't penalize for overshooting spec, is negative
         """
-        rel_specs = self.lookup(spec, goal_spec)
-        pos_val = []
-        reward = 0.0
-        for i, rel_spec in enumerate(rel_specs):
-            if self.specs_id[i] == "ibias_max":
-                rel_spec = rel_spec * -1.0  # /10.0
-            if rel_spec < 0:
-                reward += rel_spec
-                pos_val.append(0)
-            else:
-                pos_val.append(1)
+        # rel_specs = self.lookup(spec, goal_spec)
+        # pos_val = []
+        # reward = 0.0
+        # for i, rel_spec in enumerate(rel_specs):
+        #     if self.specs_id[i] == "ibias_max":
+        #         rel_spec = rel_spec * -1.0  # /10.0
+        #     if rel_spec < 0:
+        #         reward += rel_spec
+        #         pos_val.append(0)
+        #     else:
+        #         pos_val.append(1)
 
-        return reward if reward < -0.02 else 10
+        # return reward if reward < -0.02 else 10
+        norm_specs = self.lookup(spec, goal_spec)
+
+        # pay attention to reward calculation, this is not quite the reward function in RL
+        # but rather a penalty value for the optimization process
+        reward = 0
+        for i, rel_spec in enumerate(norm_specs):
+            # For power,  smaller is better
+            # For gain, larger (compared to the target/goal) is better
+            # For other specs (pm, ugbw, etc.), smaller is better
+            assert self.specs_id[i] in ["ibias_max", "gain_min", "ugbw_min", "phm_min"]
+            if self.specs_id[i] == "ibias_max" and rel_spec > 0:
+                reward += np.abs(rel_spec)  # /10
+            elif self.specs_id[i] == "gain_min" and rel_spec < 0:
+                reward += 3 * np.abs(rel_spec)  # /10
+            elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
+                reward += np.abs(rel_spec)
+        return -reward
+
 
     def update(self, params_idx):
         """
