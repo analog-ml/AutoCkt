@@ -6,6 +6,7 @@ import IPython
 import argparse
 from collections import OrderedDict
 import pickle
+import datetime
 
 
 # way of ordering the way a yaml file is read
@@ -72,6 +73,19 @@ def gen_data(CIR_YAML, env, num_specs):
     print("Generated specs range: ", specs_range)
     with open("autockt/gen_specs/ngspice_specs_gen_" + env, "wb") as f:
         pickle.dump(specs_range, f)
+
+    with open("autockt/gen_specs/ngspice_specs_gen_" + env + ".log", "w") as f:
+        f.write("total specs: " + str(len(specs_range["gain_min"])))
+        for spec in specs_range:
+            f.write("\n")
+            f.write(str(spec) + "\n")
+            f.write(str(specs_range[spec]))
+        # write generated time/date
+        f.write("\n\n")
+        f.write(
+            "Generated at: "
+            + str(datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"))
+        )
 
 
 def main():
