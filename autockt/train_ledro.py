@@ -20,7 +20,7 @@ config_train = {
     "num_gpus": 0,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
-    "num_workers": 3,
+    "num_workers": 6,
     "env_config": {"generalize": True, "run_valid": False},
 }
 
