@@ -72,6 +72,12 @@ action_space_high = np.array(
 
     ]
 )
+
+
 action = ActionNormalizer(action_space_low=action_space_low, action_space_high =  action_space_high).action(action_space.sample()) # convert [-1.1] range back to normal range
-action = action.astype(object)
+# action = action.astype(object)
+print ("action: ", action)
+
+for idx in [2, 2+3, 5+3, 8+3, 11+3, 14+3, -1, -2]:
+    action[idx] = int(action[idx])
 print ("action: ", action)
