@@ -168,7 +168,8 @@ class Zhenxin_S_FC(gym.Env):
             specs = yaml_data["target_specs"]
         else:
             load_specs_path = (
-                Zhenxin_S_FC.path + "/autockt/gen_specs/ngspice_specs_gen_ledro_d_fc45"
+                Zhenxin_S_FC.path
+                + "/autockt/gen_specs/ngspice_specs_gen_zhenxin_s_fc"  # ADD_CIRCUIT
             )
             with open(load_specs_path, "rb") as f:
                 specs = pickle.load(f)
@@ -431,7 +432,8 @@ class Zhenxin_S_FC(gym.Env):
                 reward += 3 * np.abs(rel_spec)  # /10
             elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
                 reward += np.abs(rel_spec)
-        return -reward
+        # return -reward
+        return -reward if -reward < -1.0 else 10
 
     def update(self, params_idx):
         """
