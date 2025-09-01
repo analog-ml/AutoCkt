@@ -35,7 +35,7 @@ config_train = {
 }
 config_train = {
     "train_batch_size": 1200,
-    "horizon": 100,
+    "horizon": 50,
     "num_gpus": 0,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
