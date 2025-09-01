@@ -22,6 +22,7 @@ import pickle
 import os
 
 from eval_engines.ngspice.TwoStageClass import *
+
 # ADD_CIRCUIT
 # tip: comment un-used classes to quickly grasp errors
 # from eval_engines.ngspice.LEDRO_D_FC45 import *
@@ -39,7 +40,7 @@ import numpy as np
 # Writer will output to ./runs/ directory by default
 
 # get timestamp in form of string
-date_time_obj = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+date_time_obj = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # writer = SummaryWriter(date_time_obj)
 
@@ -67,23 +68,25 @@ logger.add(
     retention="7 days",
 )
 
-class ActionNormalizer():
+
+class ActionNormalizer:
     """Rescale and relocate the actions."""
+
     def __init__(self, action_space_low, action_space_high):
-         
-        self.action_space_low = action_space_low     
+
+        self.action_space_low = action_space_low
         self.action_space_high = action_space_high
 
     def action(self, action: np.ndarray) -> np.ndarray:
         """Change the range (-1, 1) to (low, high)."""
-        low = self.action_space_low   
-        high = self.action_space_high 
+        low = self.action_space_low
+        high = self.action_space_high
 
-        scale_factor = (high - low) / 2     
-        reloc_factor = high - scale_factor  
+        scale_factor = (high - low) / 2
+        reloc_factor = high - scale_factor
 
         action = action * scale_factor + reloc_factor
-        action = np.clip(action, low, high) 
+        action = np.clip(action, low, high)
 
         return action
 
@@ -95,11 +98,12 @@ class ActionNormalizer():
         scale_factor = (high - low) / 2
         reloc_factor = high - scale_factor
 
-        action = (action - reloc_factor) / scale_factor  
+        action = (action - reloc_factor) / scale_factor
         action = np.clip(action, -1.0, 1.0)
 
         return action
-    
+
+
 # way of ordering the way a yaml file is read
 class OrderedDictYAMLLoader(yaml.Loader):
     """
@@ -205,51 +209,51 @@ class Zhenxin_S_FC(gym.Env):
         #     [spaces.Discrete(len(self.action_meaning))] * len(self.params_id)
         # )
 
-
         # ADD_CIRCUIT
-        self.action_space = spaces.Box(low=-1, high=1, shape=(24, ), dtype=np.float64)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(24,), dtype=np.float64)
 
-
-        action_space = spaces.Box(low=-1, high=1, shape=(24, ), dtype=np.float64)
+        action_space = spaces.Box(low=-1, high=1, shape=(24,), dtype=np.float64)
         # print (action_space.sample())
+
+        # fmt: off
         action_space_low = np.array(
             [
-            1, 130, 1,
-            1, 130, 1,    
-            1, 130, 1,    
-            1, 130, 1,    
-            1, 130, 1,    
-            1, 130, 1,    
-            0.1, 
-            0.1, 
-            0.1, 
-            0.1, 
-        1,
-        1
-
+                1, 130, 1,
+                1, 130, 1,    
+                1, 130, 1,    
+                1, 130, 1,    
+                1, 130, 1,    
+                1, 130, 1,    
+                0.1, 
+                0.1, 
+                0.1, 
+                0.1, 
+                1,
+                1
             ]
         )
 
         action_space_high = np.array(
             [
-            100, 990, 100,
-            100, 990, 100,    
-            100, 990, 100,    
-            100, 990, 100,    
-            100, 990, 100,    
-            100, 990, 100,    
-            1.2, 
-            1.2, 
-            1.2, 
-            1.2, 
-        50,
-        50
-
+                100, 990, 100,
+                100, 990, 100,    
+                100, 990, 100,    
+                100, 990, 100,    
+                100, 990, 100,    
+                100, 990, 100,    
+                1.2, 
+                1.2, 
+                1.2, 
+                1.2, 
+                50,
+                50
             ]
         )
+        # fmt: on
 
-        self.action_normalizer = ActionNormalizer(action_space_low=action_space_low, action_space_high =  action_space_high)
-
+        self.action_normalizer = ActionNormalizer(
+            action_space_low=action_space_low, action_space_high=action_space_high
+        )
 
         # self.action_space = spaces.Discrete(len(self.action_meaning)**len(self.params_id))
         self.observation_space = spaces.Box(
@@ -314,12 +318,14 @@ class Zhenxin_S_FC(gym.Env):
         # )
 
         # ADD_CIRCUIT
+        # fmt: off
         self.cur_params_idx = np.array([3.74753369e+01 ,1.45339479e+02 ,8.10000000e+01 ,4.47246834e+01,
                 5.42556293e+02 ,3.00000000e+01 ,7.92805812e+01, 6.73899490e+02,
                 6.50000000e+01 ,5.03197719e+01 ,1.78390864e+02, 8.20000000e+01,
                 7.67682715e+01 ,5.71772797e+02 ,7.40000000e+01, 7.27723837e+01,
                 2.66384969e+02 ,7.10000000e+01 ,1.03974815e-01, 8.55390346e-01,
                 2.17883575e-01 ,1.02317559e+00 ,1.00000000e+01, 1.00000000e+00])
+        # fmt: on
 
         self.cur_specs = self.update(self.cur_params_idx)
         cur_spec_norm = self.lookup(self.cur_specs, self.global_g)
@@ -352,18 +358,20 @@ class Zhenxin_S_FC(gym.Env):
         # # logger.debug(f"current param idx: {str(self.cur_params_idx)}")
         # # print(f"current param idx: {self.cur_params_idx=}")
         # logger.debug("current param idx simulation: " + str(self.cur_params_idx))
-        action = self.action_normalizer.action(action) # convert [-1.1] range back to normal range
+        action = self.action_normalizer.action(
+            action
+        )  # convert [-1.1] range back to normal range
         # action = action.astype(object)
 
         # ADD_CIRCUIT
-        for idx in [2, 2+3, 5+3, 8+3, 11+3, 14+3, -1, -2]:
+        for idx in [2, 2 + 3, 5 + 3, 8 + 3, 11 + 3, 14 + 3, -1, -2]:
             action[idx] = int(action[idx])
 
         self.cur_params_idx = action
 
         # Get current specs and normalize
         self.cur_specs = self.update(self.cur_params_idx)
-        #logger.info("current specs simulation: " + str(self.cur_specs))
+        # logger.info("current specs simulation: " + str(self.cur_specs))
         cur_spec_norm = self.lookup(self.cur_specs, self.global_g)
         reward = self.reward(self.cur_specs, self.specs_ideal)
         done = False
@@ -446,6 +454,7 @@ class Zhenxin_S_FC(gym.Env):
         # param_val = [OrderedDict(list(zip(self.params_id, params)))]
 
         # ADD_CIRCUIT
+        # fmt: off
         param_names = [
             "w_m12", "l_m12", "m_m12",
             "w_m3", "l_m3", "m_m3",
@@ -453,19 +462,16 @@ class Zhenxin_S_FC(gym.Env):
             "w_m67", "l_m67", "m_m67",
             "w_m89", "l_m89", "m_m89",
             "w_m1011", "l_m1011", "m_m1011",
-
             "vbp1",
             "vbp2",
-
             "vbn1",
             "vbn2",
-
             "cl",
             "cc"
             ]
-        param_val = [OrderedDict(list(zip(param_names, params_idx)))]
-        
+        # fmt: on
 
+        param_val = [OrderedDict(list(zip(param_names, params_idx)))]
 
         # run param vals and simulate
         cur_specs = OrderedDict(
