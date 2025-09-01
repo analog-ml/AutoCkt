@@ -102,6 +102,9 @@ def main():
     CIR_YAML = "eval_engines/ngspice/ngspice_inputs/yaml_files/ledro_d_fc45.yaml"
     gen_data(CIR_YAML, "ledro_d_fc45", int(args.num_specs))
 
+    CIR_YAML = "eval_engines/ngspice/ngspice_inputs/yaml_files/zhenxin_s_fc.yaml"
+    gen_data(CIR_YAML, "zhenxin_s_fc", int(args.num_specs))
+
 
 if __name__ == "__main__":
     main()
