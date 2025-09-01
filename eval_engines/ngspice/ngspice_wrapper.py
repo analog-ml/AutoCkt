@@ -13,6 +13,7 @@ import yaml
 import IPython
 from jinja2 import Template
 import shutil
+import datetime
 
 debug = False
 
@@ -54,8 +55,11 @@ class NgSpiceWrapper(object):
 
     def get_design_name(self, state):
         fname = self.base_design_name
+        # fname += str(datetime.datetime.now().timestamp())
         for value in state.values():
-            fname += "_" + str(value)
+            # fname += "_" + str(value)
+            fname += "_" + str(round(value, 3))
+
         return fname
 
     def create_design(self, state, new_fname):
