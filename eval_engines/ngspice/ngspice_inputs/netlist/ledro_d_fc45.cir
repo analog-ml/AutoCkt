@@ -4,12 +4,12 @@
 
 * Parameters
 .param tempc=27.0
-.param wp1=0.5u lp1=90n mp1={{mp1}}
-.param wp2=0.5u lp2=90n mp2={{mp2}}
-.param wp3=0.5u lp3=90n mp3={{mp3}}
-.param wp4=0.5u lp4=90n mp4={{mp4}}
-.param wp5=0.5u lp5=90n mp5={{mp5}}
-.param wp6=0.5u lp6=90n mp6={{mp6}}
+.param wp1={{wp1}}u lp1={{lp1}}n mp1={{mp1}}
+.param wp2={{wp2}}u lp2={{lp2}}n mp2={{mp2}}
+.param wp3={{wp3}}u lp3={{lp3}}n mp3={{mp3}}
+.param wp4={{wp4}}u lp4={{lp4}}n mp4={{mp4}}
+.param wp5={{wp5}}u lp5={{lp5}}n mp5={{mp5}}
+.param wp6={{wp6}}u lp6={{lp6}}n mp6={{mp6}}
 .param vdd=1.2 vcm=0.6 vbiasp1={{vbiasp1}} vbiasp2={{vbiasp2}}
 .param vbiasn0={{vbiasn0}} vbiasn1={{vbiasn1}} vbiasn2={{vbiasn2}}
 

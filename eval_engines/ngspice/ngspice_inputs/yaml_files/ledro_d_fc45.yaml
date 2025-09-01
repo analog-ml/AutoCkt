@@ -9,13 +9,26 @@ params:
   mp4:  !!python/tuple [1, 100, 100]
   mp5:  !!python/tuple [1, 100, 100]
   mp6:  !!python/tuple [1, 100, 100]
+  wp1:  !!python/tuple [0.12, 200, 100]
+  wp2:  !!python/tuple [0.12, 200, 100]
+  wp3:  !!python/tuple [0.12, 200, 100]
+  wp4:  !!python/tuple [0.12, 200, 100]
+  wp5:  !!python/tuple [0.12, 200, 100]
+  wp6:  !!python/tuple [0.12, 200, 100]
+  lp1:  !!python/tuple [90, 2000, 100]
+  lp2:  !!python/tuple [90, 2000, 100]
+  lp3:  !!python/tuple [90, 2000, 100]
+  lp4:  !!python/tuple [90, 2000, 100]
+  lp5:  !!python/tuple [90, 2000, 100]
+  lp6:  !!python/tuple [90, 2000, 100]
   vbiasp1: !!python/tuple [!!float 0, !!float 12, 20]
   vbiasp2: !!python/tuple [!!float 0, !!float 12, 20]
   vbiasn0: !!python/tuple [!!float 0, !!float 12, 20]
   vbiasn1: !!python/tuple [!!float 0, !!float 12, 20]
   vbiasn2: !!python/tuple [!!float 0, !!float 12, 20]
-
-
+  cl:  !!python/tuple [1, 50, 100]
+  cc:  !!python/tuple [1, 50, 100]
+  
 #Every specification output will be normlaized in the order of (gain, ibias, pm, ugbw)
 normalize: !!python/tuple [3300, !!float 10e-6, 70, !!float 20.0e+6]
 

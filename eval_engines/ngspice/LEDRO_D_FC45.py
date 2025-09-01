@@ -107,19 +107,6 @@ class LEDRO_D_FC45_Class(NgSpiceWrapper):
         os.makedirs(design_folder, exist_ok=True)
 
         fpath = os.path.join(design_folder, new_fname + ".cir")
-
-        state["mp1"] = int(round(state["mp1"]))
-        state["mp2"] = int(round(state["mp2"]))
-        state["mp3"] = int(round(state["mp3"]))
-        state["mp4"] = int(round(state["mp4"]))
-        state["mp5"] = int(round(state["mp5"]))
-        state["mp6"] = int(round(state["mp6"]))
-
-        state["vbiasp1"] = state["vbiasp1"] / 10
-        state["vbiasp2"] = state["vbiasp2"] / 10
-        state["vbiasn0"] = state["vbiasn0"] / 10
-        state["vbiasn1"] = state["vbiasn1"] / 10
-        state["vbiasn2"] = state["vbiasn2"] / 10
         state["design_path"] = design_folder
         with open(fpath, "w") as f:
             # render the design netlist with the current state
