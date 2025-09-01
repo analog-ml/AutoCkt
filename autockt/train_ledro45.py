@@ -44,7 +44,7 @@ config_train = {
 if True:
     trials = tune.run_experiments(
         {
-            "train_7nFinFET_LEDRO_D_DC_1": {
+            "train_7nFinFET_LEDRO_D_FC": {
                 "checkpoint_freq": 10,
                 "run": "PPO",
                 "env": LEDRO_D_FC45,
