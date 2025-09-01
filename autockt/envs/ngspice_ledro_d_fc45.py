@@ -29,6 +29,13 @@ from eval_engines.ngspice.LEDRO_D_FC45 import *
 from loguru import logger
 import sys
 
+from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+
+# Writer will output to ./runs/ directory by default
+writer = SummaryWriter()
+
+
 # Custom format string
 log_format = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -339,7 +346,7 @@ class LEDRO_D_FC45(gym.Env):
 
         # Get current specs and normalize
         self.cur_specs = self.update(self.cur_params_idx)
-        logger.info("current specs simulation: " + str(self.cur_specs))
+        #logger.info("current specs simulation: " + str(self.cur_specs))
         cur_spec_norm = self.lookup(self.cur_specs, self.global_g)
         reward = self.reward(self.cur_specs, self.specs_ideal)
         done = False
@@ -359,6 +366,11 @@ class LEDRO_D_FC45(gym.Env):
         )
         self.env_steps = self.env_steps + 1
 
+        logger.info("current specs:" + str(self.cur_specs) + ", reward: " + str(reward))
+        writer.add_scalar('gain', self.cur_specs[0], self.env_steps)
+        writer.add_scalar('ugbw', self.cur_specs[1], self.env_steps)
+        writer.add_scalar('pm', self.cur_specs[2], self.env_steps)
+        writer.add_scalar('power', self.cur_specs[3], self.env_steps)
         # print('cur ob:' + str(self.cur_specs))
         # print('ideal spec:' + str(self.specs_ideal))
         # print(reward)
@@ -445,7 +457,6 @@ class LEDRO_D_FC45(gym.Env):
                 key=lambda k: k[0],
             )
         )
-        logger.debug("current specs in **dict**: " + str(cur_specs))
         cur_specs = np.array(list(cur_specs.values()))
 
         return cur_specs
