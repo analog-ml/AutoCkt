@@ -8,7 +8,6 @@ from autockt.envs.ngspice_ledro_d_fc import LEDRO_D_FC
 from autockt.envs.ngspice_ledro_d_fc45 import LEDRO_D_FC45
 from autockt.envs.ngspice_zhenxin_s_fc import Zhenxin_S_FC
 
-
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -37,9 +36,10 @@ config_train = {
     "train_batch_size": 1200,
     "horizon": 50,
     "num_gpus": 0,
+    "lr":0.01,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
-    "num_workers": 6,
+    "num_workers": 3,
     "env_config": {"generalize": True, "run_valid": False},
 }
 # Runs training and saves the result in ~/ray_results/train_ngspice_45nm
@@ -50,7 +50,7 @@ if True:
             "train_65nm_Zhenxin_S_FC": {
                 "checkpoint_freq": 10,
                 "run": "PPO",
-                "env": Zhenxin_S_FC, # ADD_CIRCUIT
+                "env": Zhenxin_S_FC,  # ADD_CIRCUIT
                 # "stop": {"episode_reward_mean": -0.02},
                 # "stop": {"episode_reward_mean": -0.25},
                 "config": config_train,
