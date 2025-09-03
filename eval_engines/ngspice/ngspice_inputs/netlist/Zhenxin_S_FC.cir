@@ -44,6 +44,10 @@ vss 0 VSS dc=0
 *Ccomp N001 Vout {{cc}}p
 Cload Vout 0 {{cl}}p
 
+VBP1 Vbp1 0 DC {vbp1}
+VBP2 Vbp2 0 DC {vbp2}
+VBN1 Vbn1 0 DC {vbn1}
+VBN2 Vbn2 0 DC {vbn2}
 
 .ac dec 10 1 10G
 
