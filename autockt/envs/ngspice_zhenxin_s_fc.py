@@ -257,12 +257,12 @@ class Zhenxin_S_FC(gym.Env):
                 0.13, 0.12, 1,    
                 0.13, 0.12, 1,    
                 0.13, 0.12, 1,    
-                0.1, 
-                0.1, 
-                0.1, 
-                0.1, 
-                0.1,
-                0.1
+                0.0001, 
+                0.0001, 
+                0.0001, 
+                0.0001, 
+                0.0,
+                0.0
             ]
         )
 
@@ -401,8 +401,12 @@ class Zhenxin_S_FC(gym.Env):
         # action = action.astype(object)
 
         # ADD_CIRCUIT
-        for idx in [2, 2 + 3, 5 + 3, 8 + 3, 11 + 3, 14 + 3, -1, -2]:
-            action[idx] = int(action[idx])
+        for idx in [2, 2 + 3, 5 + 3, 8 + 3, 11 + 3, 14 + 3]:
+            try:
+                action[idx] = int(action[idx])
+            except:
+                logger.debug("error when rounding the M value")
+                action[idx] = 1
 
         self.cur_params_idx = action
 
@@ -474,11 +478,11 @@ class Zhenxin_S_FC(gym.Env):
             if self.specs_id[i] == "ibias_max" and rel_spec > 0:
                 reward += np.abs(rel_spec)  # /10
             elif self.specs_id[i] == "gain_min" and rel_spec < 0:
-                reward += 3 * np.abs(rel_spec)  # /10
+                reward += 1 * np.abs(rel_spec)  # /10
             elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
                 reward += np.abs(rel_spec)
         # return -reward
-        return -reward if -reward < -1.0 else 10
+        return -reward if -reward < -0.02 else 10
 
     def update(self, params_idx):
         """
