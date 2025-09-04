@@ -4,12 +4,12 @@
 
 * Parameters
 .param tempc=25.0
-.param wm12={{w_m12}}u  lm12=130u mm12=1
-.param wm3={{w_m3}}u    lm3=130u mm3=1
-.param wm45={{w_m45}}u  lm45=130u mm45=1
-.param wm67={{w_m67}}u lm67=130u mm67=1
-.param wm89={{w_m89}}u lm89=130u mm89=1
-.param wm1011={{w_m1011}}u lm1011=130u mm1011=1
+.param wm12={{w_m12}}n  lm12=130n mm12=1
+.param wm3={{w_m3}}n    lm3=130n mm3=1
+.param wm45={{w_m45}}n  lm45=130n mm45=1
+.param wm67={{w_m67}}n lm67=130n mm67=1
+.param wm89={{w_m89}}n lm89=130n mm89=1
+.param wm1011={{w_m1011}}n lm1011=130n mm1011=1
 
 .param vbp1={{vbp1}}
 .param vbp2={{vbp2}}
