@@ -1,0 +1,34 @@
+database_dir: "Autockt/checkpoint/db/two_stage_opamp_ngspice"
+dsn_netlist: "eval_engines/ngspice/ngspice_inputs/netlist/two_stage_opamp_wlm.cir"
+num_process: 1
+
+params:
+  w_wp1:  !!python/tuple [1, 100, 1]
+  l_wp1:  !!python/tuple [1, 100, 1]
+  m_wp1:  !!python/tuple [1, 100, 1]
+  w_wn1:  !!python/tuple [1, 100, 1]
+  l_wn1:  !!python/tuple [1, 100, 1]
+  m_wn1:  !!python/tuple [1, 100, 1]
+  w_wn3:  !!python/tuple [1, 100, 1]
+  l_wn3:  !!python/tuple [1, 100, 1]
+  m_wn3:  !!python/tuple [1, 100, 1]
+  w_wp3:  !!python/tuple [1, 100, 1]
+  l_wp3:  !!python/tuple [1, 100, 1]
+  m_wp3:  !!python/tuple [1, 100, 1]
+  w_wn4:  !!python/tuple [1, 100, 1]
+  l_wn4:  !!python/tuple [1, 100, 1]
+  m_wn4:  !!python/tuple [1, 100, 1]
+  w_wn5:  !!python/tuple [1, 100, 1]
+  l_wn5:  !!python/tuple [1, 100, 1]
+  m_wn5:  !!python/tuple [1, 100, 1]
+  cc:   !!python/tuple [!!float 0.1e-12, !!float 10.0e-12, !!float 0.1e-12]
+
+#Every specification output will be normlaized in the order of (gain, ibias, pm, ugbw)
+normalize: !!python/tuple [350, 0.001, 60, 950000.0]
+
+#during training, at reset a specification will be chosen at random between [min,max,#]
+target_specs:
+  gain_min: !!python/tuple [200,400]
+  ugbw_min: !!python/tuple [!!float 1.0e6, !!float 2.5e7]
+  phm_min: !!python/tuple [60,60.0000001]
+  ibias_max: !!python/tuple [0.0001, 0.01]

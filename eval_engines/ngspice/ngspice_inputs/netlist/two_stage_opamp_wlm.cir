@@ -1,0 +1,49 @@
+two_stage_amp test
+
+* Two stage OPAMP
+.include "/home/pham/shared_files/ngspice/45nm_bulk.txt"
+
+.param wp1={{w_wp1}}u lp1={{l_wp1}}n mp1={{m_wp1}}
+.param wn1={{w_wn1}}u ln1={{l_wn1}}n mn1={{m_wn1}}
+.param wn3={{w_wn3}}u ln3={{l_wn3}}n mn3={{m_wn3}}
+.param wp3={{w_wp3}}u lp3={{l_wp3}}n mp3={{m_wp3}}
+.param wn4={{w_wn4}}u ln4={{l_wn4}}n mn4={{m_wn4}}
+.param wn5={{w_wn5}}u ln5={{l_wn5}}n mn5={{m_wn5}}
+.param cc={{cc}}p
+.param ibias=30u
+.param cload=10p
+.param vcm=0.6
+ 
+mp1 net4 net4 VDD VDD pmos w=wp1 l=lp1 m=mp1
+mp2 net5 net4 VDD VDD pmos w=wp1 l=lp1 m=mp1
+mn1 net4 net2 net3 net3 nmos w=wn1 l=ln1 m=mn1
+mn2 net5 net1 net3 net3 nmos w=wn1 l=ln1 m=mn1
+mn3 net3 net7 VSS VSS nmos w=wn3 l=ln3 m=mn3
+mn4 net7 net7 VSS VSS nmos w=wn4 l=ln4 m=mn4
+mp3 net6 net5 VDD VDD pmos w=wp3 l=lp3 m=mp3
+mn5 net6 net7 VSS VSS nmos w=wn5 l=ln5 m=mn5
+cc net5 net6 cc
+ibias VDD net7 ibias
+
+vin in 0 dc=0 ac=1.0
+ein1 net1 cm in 0 0.5
+ein2 net2 cm in 0 -0.5
+vcm cm 0 dc=vcm
+
+vdd VDD 0 dc=1.2
+vss 0 VSS dc=0
+CL net6 0 cload
+
+.ac dec 10 1 10G
+
+.control
+run
+set units=degrees
+set wr_vecnames
+option numdgt=7
+wrdata {{design_path}}/ac.csv v(net6)
+op
+wrdata {{design_path}}/dc.csv i(vdd)
+.endc
+
+.end
