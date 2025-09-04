@@ -11,7 +11,7 @@ from autockt.envs.ngspice_zhenxin_s_fc import Zhenxin_S_FC
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--checkpoint_dir", "-cpd", type=str)
+parser.add_argument("--checkpoint_dir", "-cpd", type=str, default=None)
 args = parser.parse_args()
 ray.init()
 
@@ -30,21 +30,20 @@ config_train = {
     "num_gpus": 0,
     "model": {"fcnet_hiddens": [64, 64]},
     "num_workers": 6,
-    "env_config": {"generalize": True, "run_valid": False},
+    "env_config": {"generalize": False, "run_valid": False},
 }
 config_train = {
     "train_batch_size": 1200,
     "horizon": 50,
     "num_gpus": 0,
-    "lr":0.01,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
-    "num_workers": 3,
-    "env_config": {"generalize": True, "run_valid": False},
+    "num_workers": 6,
+    "env_config": {"generalize": False, "run_valid": False},
 }
 # Runs training and saves the result in ~/ray_results/train_ngspice_45nm
 # If checkpoint fails for any reason, training can be restored
-if True:
+if not args.checkpoint_dir:
     trials = tune.run_experiments(
         {
             "train_65nm_Zhenxin_S_FC": {
@@ -67,7 +66,6 @@ if True:
 
 else:
     print("RESTORING NOW!!!!!!")
-    exit()  # do not restore for now
     tune.run_experiments(
         {
             "restore_ppo": {
