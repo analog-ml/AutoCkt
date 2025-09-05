@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/tune/trial_runner.py", line 378, in _process_events
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/tune/ray_trial_executor.py", line 228, in fetch_result
+    result = ray.get(trial_future[0])
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/worker.py", line 2132, in get
+    raise value
+ray.worker.RayTaskError: [36mray_worker[39m (pid=3651946, host=cda-server-2)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/agents/agent.py", line 284, in train
+    result = Trainable.train(self)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/tune/trainable.py", line 151, in train
+    result = self._train()
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/agents/ppo/ppo.py", line 103, in _train
+    fetches = self.optimizer.step()
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/optimizers/multi_gpu_optimizer.py", line 125, in step
+    self.num_envs_per_worker, self.train_batch_size)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/optimizers/rollout.py", line 28, in collect_samples
+    next_sample = ray.get(fut_sample)
+ray.worker.RayTaskError: [36mray_worker[39m (pid=3651940, host=cda-server-2)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/evaluation/policy_evaluator.py", line 368, in sample
+    batches = [self.input_reader.next()]
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/offline/input_reader.py", line 31, in next
+    batches = [self.sampler.get_data()]
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/evaluation/sampler.py", line 65, in get_data
+    item = next(self.rollout_provider)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/evaluation/sampler.py", line 267, in _env_runner
+    preprocessors, obs_filters, unroll_length, pack, callbacks)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/evaluation/sampler.py", line 403, in _process_observations
+    resetted_obs = base_env.try_reset(env_id)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/env/base_env.py", line 257, in try_reset
+    return {_DUMMY_AGENT_ID: self.vector_env.reset_at(env_id)}
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/ray/rllib/env/vector_env.py", line 88, in reset_at
+    return self.envs[index].reset()
+  File "/home/pham/code/analog-ml/AutoCkt-optimize-Zhenxin_S_FC_65nmPTM-run14/autockt/envs/ngspice_zhenxin_s_fc.py", line 344, in reset
+    self.cur_specs = self.update(self.cur_params_idx)
+  File "/home/pham/code/analog-ml/AutoCkt-optimize-Zhenxin_S_FC_65nmPTM-run14/autockt/envs/ngspice_zhenxin_s_fc.py", line 496, in update
+    self.sim_env.create_design_and_simulate(param_val[0])[1].items(),
+  File "/home/pham/code/analog-ml/AutoCkt-optimize-Zhenxin_S_FC_65nmPTM-run14/eval_engines/ngspice/ngspice_wrapper.py", line 133, in create_design_and_simulate
+    specs = self.translate_result(design_folder)
+  File "/home/pham/code/analog-ml/AutoCkt-optimize-Zhenxin_S_FC_65nmPTM-run14/eval_engines/ngspice/Zhenxin_S_FC.py", line 29, in translate_result
+    freq, vout, ibias = self.parse_output(output_path)
+  File "/home/pham/code/analog-ml/AutoCkt-optimize-Zhenxin_S_FC_65nmPTM-run14/eval_engines/ngspice/Zhenxin_S_FC.py", line 46, in parse_output
+    ac_raw_outputs = np.genfromtxt(ac_fname, skip_header=1)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/numpy/lib/npyio.py", line 1744, in genfromtxt
+    fhd = iter(np.lib._datasource.open(fname, 'rt', encoding=encoding))
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/numpy/lib/_datasource.py", line 266, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+  File "/home/pham/anaconda3/envs/autockt/lib/python3.5/site-packages/numpy/lib/_datasource.py", line 624, in open
+    raise IOError("%s not found." % path)
+OSError: /tmp/ckt_da/designs_Zhenxin_S_FC/Zhenxin_S_FC_242.843_133.808_292.648_198.925_139.809_131.131_0.657_0.178_0.686_0.305_1.04127/ac.csv not found.
+
+
