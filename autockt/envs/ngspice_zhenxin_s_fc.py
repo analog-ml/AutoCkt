@@ -156,6 +156,27 @@ class Zhenxin_S_FC(gym.Env):
     )
 
     def __init__(self, env_config):
+        """
+        Initialize the environment from a configuration dictionary, load circuit specs and parameter grids, set up the simulator, action/observation spaces, and initial state.
+        
+        env_config keys recognized:
+        - "multi_goal" (bool): if True, allow multiple per-instance goal vectors; default False.
+        - "generalize" (bool): if True, use precomputed generated specs instead of target_specs from YAML; default False.
+        - "num_valid" (int): count used when optionally saving sampled specs; default 50.
+        - "save_specs" (bool): if True, persist loaded specs to a pickle file; default False.
+        - "run_valid" (bool): validation mode flag used when generalize is True; default False.
+        
+        Behavior and side effects:
+        - Loads circuit/design YAML (CIR_YAML) using an ordered YAML loader and either reads target_specs or loads generated specs from disk (when generalize is True).
+        - Constructs an ordered specs mapping, optional saving to a pickle file, and records spec identifiers and the fixed goal index.
+        - Builds parameter value grids from YAML "params" and stores parameter identifiers.
+        - Initializes the simulator interface (self.sim_env).
+        - Defines an 11-dimensional continuous action space in [-1, 1] and an ActionNormalizer that maps actions to the configured physical ranges (action_space_low / action_space_high).
+        - Defines the observation space combining normalized current specs, normalized ideal specs, and current parameter values.
+        - Initializes runtime state containers: self.cur_specs, self.cur_params_idx, self.g_star (design goal values), self.global_g (normalization factors), and self.obj_idx (objective index for validation).
+        
+        No return value.
+        """
         self.multi_goal = env_config.get("multi_goal", False)
         self.generalize = env_config.get("generalize", False)
         num_valid = env_config.get("num_valid", 50)
@@ -282,6 +303,27 @@ class Zhenxin_S_FC(gym.Env):
 
     def reset(self):
         # if multi-goal is selected, every time reset occurs, it will select a different design spec as objective
+        """
+        Reset the environment state and return the initial observation.
+        
+        Resets or (when generalization is enabled) selects a new target design specification, normalizes it, initializes the current parameter vector (hard-coded in this implementation), computes the initial simulated specs for those parameters, evaluates the initial reward, and constructs the initial observation.
+        
+        Behavior:
+        - If generalize is True:
+          - If valid is True, cycles through spec indices using self.obj_idx (wraps to 0 when exceeding available designs).
+          - Otherwise selects a random spec index.
+          - Sets self.specs_ideal to the selected column across all stored specs.
+        - If generalize is False:
+          - If multi_goal is False, sets self.specs_ideal to self.g_star (single global goal).
+          - If multi_goal is True, selects a random spec index and sets self.specs_ideal accordingly.
+        - Computes self.specs_ideal_norm via self.lookup against self.global_g.
+        - Assigns a predefined initial parameter vector to self.cur_params_idx (overwrites multiple candidate vectors; final assignment used).
+        - Calls self.update(self.cur_params_idx) to compute self.cur_specs and normalizes it.
+        - Computes initial reward (via self.reward) and builds the initial observation self.ob by concatenating normalized current specs, normalized ideal specs, and current parameter values.
+        
+        Returns:
+            numpy.ndarray: The initial observation vector (concatenation of current-specs-normalized, ideal-specs-normalized, and current parameter values).
+        """
         if self.generalize == True:
             if self.valid == True:
                 if self.obj_idx > self.num_os - 1:
@@ -353,8 +395,19 @@ class Zhenxin_S_FC(gym.Env):
 
     def step(self, action):
         """
-        :param action: is vector with elements between 0 and 1 mapped to the index of the corresponding parameter
-        :return:
+        Apply an action to update the environment's parameters, run the simulator, and return the next observation, reward, termination flag, and info.
+        
+        The provided `action` is expected in the agent's action space (typically values in [-1, 1]); it is first mapped to the environment's parameter value space using self.action_normalizer.action. The mapped values replace the current parameter vector, the simulator is invoked via self.update(...) to produce new specs, and a scalar reward is computed comparing the current specs to the environment goal. The environment's internal observation (self.ob) and step counter (self.env_steps) are updated.
+        
+        Parameters:
+            action (array-like): Agent action vector (shape matches the environment action space, e.g., length 11). Values are in the agent's action range and will be converted to actual parameter values by the environment's ActionNormalizer.
+        
+        Returns:
+            tuple:
+                observation (np.ndarray): Concatenation of normalized current specs, normalized ideal specs, and the current parameter values.
+                reward (float): Reward computed by self.reward(...) for the resulting specs.
+                done (bool): True when a terminal condition is met (reward >= 10), otherwise False.
+                info (dict): Empty dict (reserved for additional diagnostics).
         """
 
         # Take action that RL agent returns to change current params
@@ -426,7 +479,22 @@ class Zhenxin_S_FC(gym.Env):
 
     def reward(self, spec, goal_spec):
         """
-        Reward: doesn't penalize for overshooting spec, is negative
+        Compute a scalar objective for the current specs relative to a goal specification.
+        
+        This function:
+        - Normalizes the difference between `spec` and `goal_spec` using self.lookup.
+        - Accumulates a penalty according to per-spec rules:
+          - "ibias_max": penalize only when the normalized value is positive (larger than goal).
+          - "gain_min": penalize only when the normalized value is negative (smaller than goal).
+          - All other tracked specs ("ugbw_min", "phm_min"): penalize when the normalized value is negative (smaller than goal).
+        - Returns either the negated accumulated penalty (a negative value) or 10 when the negated penalty is above a small threshold, indicating a sufficiently good match.
+        
+        Parameters:
+            spec (array-like): Current specification values (ordered to match self.specs_id).
+            goal_spec (array-like): Target/ideal specification values.
+        
+        Returns:
+            float: Either a negative penalty (-sum_of_violations) or 10 when the negated penalty is >= -0.02 (tolerance threshold).
         """
         # rel_specs = self.lookup(spec, goal_spec)
         # pos_val = []
@@ -463,9 +531,16 @@ class Zhenxin_S_FC(gym.Env):
 
     def update(self, params_idx):
         """
-
-        :param action: an int between 0 ... n-1
-        :return:
+        Update the circuit design using the provided parameter vector, run the simulator, and return the resulting specifications.
+        
+        Parameters:
+            params_idx (Sequence[int|float]): Sequence of 11 parameter values (in the same order as the internal
+                param_names: ["w_m12","w_m3","w_m45","w_m67","w_m89","w_m1011","vbp1","vbp2","vbn1","vbn2","cc"].
+                These are treated as the parameter values passed to the simulator.
+        
+        Returns:
+            numpy.ndarray: 1-D array of simulated specification values. The specs are taken from the simulator's
+            output, sorted by specification name (ascending) before conversion to the array.
         """
 
         # params = [self.params[i][params_idx[i]] for i in range(len(self.params_id))]

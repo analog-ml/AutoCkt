@@ -7,11 +7,32 @@ class ActionNormalizer:
 
     def __init__(self, action_space_low, action_space_high):
 
+        """
+        Initialize the ActionNormalizer with per-dimension action bounds.
+        
+        Parameters:
+            action_space_low (array-like): 1-D array of per-dimension minimum action values (lower bounds).
+            action_space_high (array-like): 1-D array of per-dimension maximum action values (upper bounds).
+        
+        Both arrays must have the same shape and correspond elementwise; they are used to map actions between the canonical range (-1, 1) and the problem-specific [low, high] range.
+        """
         self.action_space_low = action_space_low
         self.action_space_high = action_space_high
 
     def action(self, action: np.ndarray) -> np.ndarray:
-        """Change the range (-1, 1) to (low, high)."""
+        """
+        Map an elementwise action from the canonical range (-1, 1) into the instance's per-dimension [low, high] bounds.
+        
+        The input `action` is expected to be an ndarray with the same shape as the normalizer's bounds. Each element x is transformed with a linear mapping:
+            y = x * ((high - low) / 2) + (high - (high - low) / 2)
+        and then clipped to the corresponding [low, high] interval.
+        
+        Parameters:
+            action (np.ndarray): Elementwise action values in (−1, 1) to be scaled.
+        
+        Returns:
+            np.ndarray: Action mapped and clipped to the per-dimension [low, high] range.
+        """
         low = self.action_space_low
         high = self.action_space_high
 
@@ -24,7 +45,13 @@ class ActionNormalizer:
         return action
 
     def reverse_action(self, action: np.ndarray) -> np.ndarray:
-        """Change the range (low, high) to (-1, 1)."""
+        """
+        Map an action from the environment bounds [low, high] back into the canonical (-1, 1) range.
+        
+        Per-dimension inverse linear transform using this instance's action_space_low and action_space_high:
+        scale = (high - low) / 2 and offset = high - scale, then result = (action - offset) / scale.
+        The output is clipped elementwise to [-1.0, 1.0] and returned as an ndarray with the same shape as the input.
+        """
         low = self.action_space_low
         high = self.action_space_high
 
