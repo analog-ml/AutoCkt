@@ -210,45 +210,44 @@ class Zhenxin_S_FC(gym.Env):
         # )
 
         # ADD_CIRCUIT
-        self.action_space = spaces.Box(low=-1, high=1, shape=(24,), dtype=np.float64)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(11,), dtype=np.float64)
 
-        action_space = spaces.Box(low=-1, high=1, shape=(24,), dtype=np.float64)
+        action_space = spaces.Box(low=-1, high=1, shape=(11,), dtype=np.float64)
         # print (action_space.sample())
 
         # fmt: off
         action_space_low = np.array(
             [
-                1, 130, 1,
-                1, 130, 1,    
-                1, 130, 1,    
-                1, 130, 1,    
-                1, 130, 1,    
-                1, 130, 1,    
-                0.1, 
-                0.1, 
-                0.1, 
-                0.1, 
-                1,
-                1
+                130,
+                130, 
+                130, 
+                130,
+                130,
+                130, 
+                0.0001, 
+                0.0001, 
+                0.0001, 
+                0.0001, 
+                0.01,
             ]
         )
 
         action_space_high = np.array(
             [
-                100, 990, 100,
-                100, 990, 100,    
-                100, 990, 100,    
-                100, 990, 100,    
-                100, 990, 100,    
-                100, 990, 100,    
-                1.2, 
-                1.2, 
-                1.2, 
-                1.2, 
-                50,
-                50
+                100000,
+                100000, 
+                100000,
+                100000, 
+                100000,
+                100000, 
+                1.0, 
+                1.0, 
+                1.0, 
+                1.0, 
+                10,
             ]
         )
+
         # fmt: on
 
         self.action_normalizer = ActionNormalizer(
@@ -325,6 +324,21 @@ class Zhenxin_S_FC(gym.Env):
                 7.67682715e+01 ,5.71772797e+02 ,7.40000000e+01, 7.27723837e+01,
                 2.66384969e+02 ,7.10000000e+01 ,1.03974815e-01, 8.55390346e-01,
                 2.17883575e-01 ,1.02317559e+00 ,1.00000000e+01, 1.00000000e+00])
+        self.cur_params_idx = np.array([32.77338894433899,262.7480907119822,189.0,158.15349366404624,348.4724582030384,154.0,79.77405852298419,1111.4785699664237,86.0,99.43193620474902,1571.1634654290083,137.0,92.27007942763514,582.0961144404719,165.0,62.95195636704306,742.9661412949395,150.0,0.15006895370431445,0.707724000583208,0.34247109456861674,0.8081614628147477,24.0,18.0])
+        self.cur_params_idx = np.array([1.306996077907531,1.3377967426358073,40.0,5.954494693818084,0.8992126892338544,37.0,25.488818790800927,0.4551653253998019,112.0,4.224049384633847,0.5619414658059543,140.0,25.698553139281227,1.0913253825818343,39.0,12.149631485977649,0.586970473291363,1.0,1.1773170908295258,0.2848438042937586,1.0786470679021434,0.8902246665998383,12.0,47.0])
+        self.cur_params_idx = np.array([2.4284323390575366,1.338078576088182,78.0,29.264831036522917,1.9892456090951285,33.0,13.980927503463723,1.3113102449401783,17.0,32.12785582624383,1.8436928811518705,5.0,42.023886484328216,1.3431306578872302,46.0,35.47162817259426,1.3712540446476695,77.0,0.6568611016690267,0.17811360700059536,0.686108575948138,0.3053737857576733,1.0,1.0])
+        self.cur_params_idx = np.array([242.84323390575366,
+                                        133.8078576088182,
+                                        292.64831036522917,
+                                        198.92456090951285,
+                                        139.80927503463723,
+                                        131.13102449401783,
+                                        0.6568611016690267,
+                                        0.17811360700059536,
+                                        0.686108575948138,
+                                        0.3053737857576733,
+                                        1.0,])
+
         # fmt: on
 
         self.cur_specs = self.update(self.cur_params_idx)
@@ -364,8 +378,12 @@ class Zhenxin_S_FC(gym.Env):
         # action = action.astype(object)
 
         # ADD_CIRCUIT
-        for idx in [2, 2 + 3, 5 + 3, 8 + 3, 11 + 3, 14 + 3, -1, -2]:
-            action[idx] = int(action[idx])
+        # for idx in [2, 2 + 3, 5 + 3, 8 + 3, 11 + 3, 14 + 3]:
+        #     try:
+        #         action[idx] = int(action[idx])
+        #     except:
+        #         logger.debug("error when rounding the M value")
+        #         action[idx] = 1
 
         self.cur_params_idx = action
 
@@ -437,11 +455,11 @@ class Zhenxin_S_FC(gym.Env):
             if self.specs_id[i] == "ibias_max" and rel_spec > 0:
                 reward += np.abs(rel_spec)  # /10
             elif self.specs_id[i] == "gain_min" and rel_spec < 0:
-                reward += 3 * np.abs(rel_spec)  # /10
+                reward += 1 * np.abs(rel_spec)  # /10
             elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
                 reward += np.abs(rel_spec)
         # return -reward
-        return -reward if -reward < -1.0 else 10
+        return -reward if -reward < -0.02 else 10
 
     def update(self, params_idx):
         """
@@ -456,17 +474,16 @@ class Zhenxin_S_FC(gym.Env):
         # ADD_CIRCUIT
         # fmt: off
         param_names = [
-            "w_m12", "l_m12", "m_m12",
-            "w_m3", "l_m3", "m_m3",
-            "w_m45", "l_m45", "m_m45",
-            "w_m67", "l_m67", "m_m67",
-            "w_m89", "l_m89", "m_m89",
-            "w_m1011", "l_m1011", "m_m1011",
+            "w_m12",
+            "w_m3", 
+            "w_m45",
+            "w_m67", 
+            "w_m89", 
+            "w_m1011", 
             "vbp1",
             "vbp2",
             "vbn1",
             "vbn2",
-            "cl",
             "cc"
             ]
         # fmt: on
