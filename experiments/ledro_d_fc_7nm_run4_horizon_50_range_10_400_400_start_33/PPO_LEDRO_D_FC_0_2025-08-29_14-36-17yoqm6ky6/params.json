@@ -1,0 +1,18 @@
+{
+  "env": "<class 'autockt.envs.ngspice_ledro_d_fc.LEDRO_D_FC'>",
+  "env_config": {
+    "generalize": true,
+    "run_valid": false
+  },
+  "horizon": 50,
+  "model": {
+    "fcnet_hiddens": [
+      128,
+      128,
+      128
+    ]
+  },
+  "num_gpus": 0,
+  "num_workers": 6,
+  "train_batch_size": 1200
+}

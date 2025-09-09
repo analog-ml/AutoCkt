@@ -1,0 +1,64 @@
+*Zhenxin_S_FC
+
+.include "/home/pham/code/analog-ml/AutoCkt/eval_engines/ngspice/ngspice_inputs/spice_models/65nm_bulk.txt"
+
+* Parameters
+.param tempc=25.0
+.param wm12={{w_m12}}n  lm12=130n mm12=1
+.param wm3={{w_m3}}n    lm3=130n mm3=1
+.param wm45={{w_m45}}n  lm45=130n mm45=1
+.param wm67={{w_m67}}n lm67=130n mm67=1
+.param wm89={{w_m89}}n lm89=130n mm89=1
+.param wm1011={{w_m1011}}n lm1011=130n mm1011=1
+
+.param vbp1={{vbp1}}
+.param vbp2={{vbp2}}
+.param vbn1={{vbn1}}
+.param vbn2={{vbn2}}
+
+.param vdd=1.2
+.param vcm=0.6
+
+
+M3 N004 Vbp1 VDD VDD pmos W={wm3} L={lm3} m={mm3} 
+M4 N002 N001 VDD VDD pmos W={wm45} L={lm45} m={mm45}
+M5 N003 N001 VDD VDD pmos W={wm45} L={lm45} m={mm45}
+M7 Vout Vbp2 N003 N003 pmos W={wm67} L={lm67} m={mm67}
+M6 N001 Vbp2 N002 N002 pmos W={wm67} L={lm67} m={mm67}
+M1 N006 Vinp N004 N004 pmos W={wm12} L={lm12} m={mm12}
+M2 N005 Vinn N004 N004 pmos W={wm12} L={lm12} m={mm12}
+M8 N001 Vbn1 N006 N006 nmos W={wm89} L={lm89} m={mm89}
+M9 Vout Vbn1 N005 N005 nmos W={wm89} L={lm89} m={mm89}
+M10 N006 Vbn2 0 0 nmos W={wm1011} L={lm1011} m={mm1011}
+M11 N005 Vbn2 0 0 nmos W={wm1011} L={lm1011} m={mm1011}
+
+
+
+vin in 0 dc=0 ac=1.0
+ein1 Vinp cm in 0 0.5
+ein2 Vinn cm in 0 -0.5
+vcm cm 0 dc={vcm}
+
+vdd VDD 0 dc=1.2
+vss 0 VSS dc=0
+Ccomp N001 Vout {{cc}}p
+Cload Vout 0 1p
+
+VBP1 Vbp1 0 DC {vbp1}
+VBP2 Vbp2 0 DC {vbp2}
+VBN1 Vbn1 0 DC {vbn1}
+VBN2 Vbn2 0 DC {vbn2}
+
+.ac dec 10 1 10G
+
+.control
+run
+set units=degrees
+set wr_vecnames
+option numdgt=7
+wrdata {{design_path}}/ac.csv v(Vout)
+op
+wrdata {{design_path}}/dc.csv i(vdd)
+.endc
+
+.end

@@ -1,0 +1,107 @@
+*fully_differential_folded_cascode.css (ledro)
+
+.include "/home/pham/code/analog-ml/AutoCkt/eval_engines/ngspice/ngspice_inputs/spice_models/45nm_bulk.txt"
+
+* Parameters
+.param tempc=27.0
+.param wp1={{wp1}}u lp1={{lp1}}n mp1={{mp1}}
+.param wp2={{wp2}}u lp2={{lp2}}n mp2={{mp2}}
+.param wp3={{wp3}}u lp3={{lp3}}n mp3={{mp3}}
+.param wp4={{wp4}}u lp4={{lp4}}n mp4={{mp4}}
+.param wp5={{wp5}}u lp5={{lp5}}n mp5={{mp5}}
+.param wp6={{wp6}}u lp6={{lp6}}n mp6={{mp6}}
+.param vdd=1.2 vcm=0.6 vbiasp1={{vbiasp1}} vbiasp2={{vbiasp2}}
+.param vbiasn0={{vbiasn0}} vbiasn1={{vbiasn1}} vbiasn2={{vbiasn2}}
+
+M6 Voutp Vbiasp2 net23 vdd pmos W={wp1} L={lp1} m={mp1} 
+M5 Voutn Vbiasp2 net24 vdd pmos W={wp1} L={lp1} m={mp1} 
+M2 net23 Vbiasp1 vdd vdd pmos W={wp2} L={lp2} m={mp2} 
+M1 net24 Vbiasp1 vdd vdd pmos W={wp2} L={lp2} m={mp2} 
+M8 Voutp Vbiasn2 net27 0 nmos W={wp3} L={lp3} m={mp3} 
+M7 Voutn Vbiasn2 net25 0 nmos W={wp3} L={lp3} m={mp3} 
+M3 net24 Vinp net13 0 nmos W={wp4} L={lp4} m={mp4} 
+M0 net23 Vinn net13 0 nmos W={wp4} L={lp4} m={mp4} 
+M10 net27 Vbiasn1 0 0 nmos W={wp5} L={lp5} m={mp5} 
+M9 net25 Vbiasn1 0 0 nmos W={wp5} L={lp5} m={mp5} 
+M4 net13 Vbiasn0 0 0 nmos W={wp6} L={lp6} m={mp6} 
+
+* Voltage sources
+* VS gnd 0 DC 0
+V0 vdd 0 DC {vdd}
+V2 in 0 DC 0 AC 1
+E1 Vinp cm in 0 0.5
+E0 Vinn cm in 0 -0.5
+V1 cm 0 DC {vcm}
+VP1 Vbiasp1 0 DC {vbiasp1}
+VP2 Vbiasp2 0 DC {vbiasp2}
+VN Vbiasn0 0 DC {vbiasn0}
+VN1 Vbiasn1 0 DC {vbiasn1}
+VN2 Vbiasn2 0 DC {vbiasn2}
+
+
+.control
+op
+set xbrushwidth=3
+set filetype=ascii
+run
+
+let vgs_nm0 = v(Vinn) - v(net13)
+let vds_nm0 = v(net23) - v(net13)
+
+let vgs_nm1 = v(Vbiasp1) - v(vdd)
+let vds_nm1 = v(net24) - v(vdd)
+
+let vgs_nm2 = v(Vbiasp1) - v(vdd)
+let vds_nm2 = v(net23) - v(vdd)
+
+let vgs_nm3 = v(Vinp) - v(net13)
+let vds_nm3 = v(net24) - v(net13)
+
+let vgs_nm4 = v(Vbiasn0) 
+let vds_nm4 = v(net13) 
+
+let vgs_nm5 = v(Vbiasp2) - v(net24)
+let vds_nm5 = v(Voutn) - v(net24)
+
+let vgs_nm6 = v(Vbiasp2) - v(net23)
+let vds_nm6 = v(Voutp) - v(net23)
+
+let vgs_nm7 = v(Vbiasn2) - v(net25)
+let vds_nm7 = v(Voutn) - v(net25)
+
+let vgs_nm8 = v(Vbiasn2) - v(net27)
+let vds_nm8 = v(Voutp) - v(net27)
+
+let vgs_nm9 = v(Vbiasn1)
+let vds_nm9 = v(net25)
+
+let vgs_nm10 = v(Vbiasn1) 
+let vds_nm10 = v(net27) 
+
+write output.log I(V0) @m0[gm] @m0[ids] @m0[vth] vgs_nm0 vds_nm0
++ @m1[gm] @m1[ids] @m1[vth] vgs_nm1 vds_nm1
++ @m2[gm] @m2[ids] @m2[vth] vgs_nm2 vds_nm2 
++ @m3[gm] @m3[ids] @m3[vth] vgs_nm3 vds_nm3
++ @m4[gm] @m4[ids] @m4[vth] vgs_nm4 vds_nm4
++ @m5[gm] @m5[ids] @m5[vth] vgs_nm5 vds_nm5 
++ @m6[gm] @m6[ids] @m6[vth] vgs_nm6 vds_nm6
++ @m7[gm] @m7[ids] @m7[vth] vgs_nm7 vds_nm7
++ @m8[gm] @m8[ids] @m8[vth] vgs_nm8 vds_nm8
++ @m9[gm] @m9[ids] @m9[vth] vgs_nm9 vds_nm9
++ @m10[gm] @m10[ids] @m10[vth] vgs_nm10 vds_nm10
+
+
+ac dec 10 1 100G
+run
+set units=degrees
+set wr_vecnames
+option numdgt=7
+wrdata {{design_path}}/ac.csv v(Voutp)-v(Voutn)
+
+
+op
+wrdata {{design_path}}/dc.csv i(V0)
+quit
+.endc
+
+.end
