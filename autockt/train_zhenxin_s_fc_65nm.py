@@ -1,6 +1,6 @@
 import ray
 import ray.tune as tune
-from ray.rllib.agents import ppo
+from ray.rllib.algorithms.ppo import PPO
 from autockt.envs.ngspice_vanilla_opamp import TwoStageAmp
 from autockt.envs.ngspice_ledro_d_fc import LEDRO_D_FC
 
@@ -36,6 +36,7 @@ config_train = {
     "train_batch_size": 1200,
     "horizon": 50,
     "num_gpus": 0,
+    "rollout_fragment_length": 50,
     # "model": {"fcnet_hiddens": [64, 64]},
     "model": {"fcnet_hiddens": [128, 128, 128]},
     "num_workers": 6,
@@ -47,10 +48,10 @@ if not args.checkpoint_dir:
     trials = tune.run_experiments(
         {
             "train_65nm_Zhenxin_S_FC": {
-                "checkpoint_freq": 10,
+                # "checkpoint_freq": 10,
                 "run": "PPO",
                 "env": Zhenxin_S_FC,  # ADD_CIRCUIT
-                # "stop": {"episode_reward_mean": -0.02},
+                "stop": {"episode_reward_mean": -0.02},
                 # "stop": {"episode_reward_mean": -0.25},
                 "config": config_train,
             },
