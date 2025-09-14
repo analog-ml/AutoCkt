@@ -35,13 +35,11 @@ import datetime
 from loguru import logger
 import sys
 
-from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 
 # Writer will output to ./runs/ directory by default
 
 # get timestamp in form of string
-date_time_obj = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # writer = SummaryWriter(date_time_obj)
 
