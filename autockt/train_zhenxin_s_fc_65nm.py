@@ -3,6 +3,9 @@ import ray.tune as tune
 from ray.rllib.algorithms.ppo import PPO
 from autockt.envs.ngspice_vanilla_opamp import TwoStageAmp
 from autockt.envs.ngspice_ledro_d_fc import LEDRO_D_FC
+import numpy as np
+from ray.rllib.callbacks.callbacks import RLlibCallback
+
 
 # ADD_CIRCUIT
 from autockt.envs.ngspice_ledro_d_fc45 import LEDRO_D_FC45
@@ -32,6 +35,47 @@ config_train = {
     "num_workers": 6,
     "env_config": {"generalize": False, "run_valid": False},
 }
+
+
+class RewardMonitor(RLlibCallback):
+    def on_episode_created(self, *, episode, **kwargs):
+        # Initialize an empty list in the `custom_data` property of `episode`.
+        episode.custom_data["reward_0"] = []
+        episode.custom_data["reward_1"] = []
+        episode.custom_data["reward_2"] = []
+        episode.custom_data["reward_3"] = []
+        episode.custom_data["reward_4"] = []
+        episode.custom_data["reward_5"] = []
+        episode.custom_data["reward_idx"] = []
+
+    def on_episode_step(self, *, episode, env, **kwargs):
+        # Append the current reward to the list.
+        episode.custom_data["reward_0"].append(env.envs[0].unwrapped.ret_reward_0)
+        episode.custom_data["reward_1"].append(env.envs[0].unwrapped.ret_reward_1)
+        episode.custom_data["reward_2"].append(env.envs[0].unwrapped.ret_reward_2)
+        episode.custom_data["reward_3"].append(env.envs[0].unwrapped.ret_reward_3)
+        episode.custom_data["reward_4"].append(env.envs[0].unwrapped.ret_reward_4)
+        episode.custom_data["reward_5"].append(env.envs[0].unwrapped.ret_reward_5)
+        episode.custom_data["reward_idx"].append(env.envs[0].unwrapped.reward_idx)
+
+    def on_episode_end(self, *, episode, metrics_logger, **kwargs):
+        avg_reward_0 = np.mean(episode.custom_data["reward_0"])
+        avg_reward_1 = np.mean(episode.custom_data["reward_1"])
+        avg_reward_2 = np.mean(episode.custom_data["reward_2"])
+        avg_reward_3 = np.mean(episode.custom_data["reward_3"])
+        avg_reward_4 = np.mean(episode.custom_data["reward_4"])
+        avg_reward_5 = np.mean(episode.custom_data["reward_5"])
+        reward_idx = np.max(episode.custom_data["reward_idx"])
+
+        metrics_logger.log_value("reward_org", avg_reward_0, reduce="mean", window=1)
+        metrics_logger.log_value("reward_1_mean", avg_reward_1, reduce="mean", window=1)
+        metrics_logger.log_value("reward_2_mean", avg_reward_2, reduce="mean", window=1)
+        metrics_logger.log_value("reward_3_mean", avg_reward_3, reduce="mean", window=1)
+        metrics_logger.log_value("reward_4_mean", avg_reward_4, reduce="mean", window=1)
+        metrics_logger.log_value("reward_5_mean", avg_reward_5, reduce="mean", window=1)
+        metrics_logger.log_value("reward_idx", reward_idx, reduce="max", window=1)
+
+
 config_train = {
     "train_batch_size": 1200,
     "horizon": 50,
@@ -41,6 +85,7 @@ config_train = {
     "model": {"fcnet_hiddens": [128, 128, 128]},
     "num_workers": 6,
     "env_config": {"generalize": False, "run_valid": False},
+    "callbacks": RewardMonitor,
 }
 # Runs training and saves the result in ~/ray_results/train_ngspice_45nm
 # If checkpoint fails for any reason, training can be restored
