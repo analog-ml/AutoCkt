@@ -14,8 +14,46 @@ import IPython
 from jinja2 import Template
 import shutil
 import datetime
+from collections import OrderedDict
 
 debug = False
+
+
+# way of ordering the way a yaml file is read
+class OrderedDictYAMLLoader(yaml.Loader):
+    """
+    A YAML loader that loads mappings into ordered dictionaries.
+    """
+
+    def __init__(self, *args, **kwargs):
+        yaml.Loader.__init__(self, *args, **kwargs)
+
+        self.add_constructor("tag:yaml.org,2002:map", type(self).construct_yaml_map)
+        self.add_constructor("tag:yaml.org,2002:omap", type(self).construct_yaml_map)
+
+    def construct_yaml_map(self, node):
+        data = OrderedDict()
+        yield data
+        value = self.construct_mapping(node)
+        data.update(value)
+
+    def construct_mapping(self, node, deep=False):
+        if isinstance(node, yaml.MappingNode):
+            self.flatten_mapping(node)
+        else:
+            raise yaml.constructor.ConstructorError(
+                None,
+                None,
+                "expected a mapping node, but found %s" % node.id,
+                node.start_mark,
+            )
+
+        mapping = OrderedDict()
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            value = self.construct_object(value_node, deep=deep)
+            mapping[key] = value
+        return mapping
 
 
 class NgSpiceWrapper(object):
@@ -29,7 +67,7 @@ class NgSpiceWrapper(object):
             self.root_dir = root_dir
 
         with open(yaml_path, "r") as f:
-            yaml_data = yaml.load(f)
+            yaml_data = yaml.load(f, OrderedDictYAMLLoader)
         design_netlist = yaml_data["dsn_netlist"]
         design_netlist = path + "/" + design_netlist
         if not os.path.isfile(design_netlist):
