@@ -300,6 +300,11 @@ class Zhenxin_S_FC(gym.Env):
         # objective number (used for validation)
         self.obj_idx = 0
 
+        self.reward_idx = 0
+
+    def set_reward_fn(self, idx):
+        self.reward_idx = idx
+
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         # if multi-goal is selected, every time reset occurs, it will select a different design spec as objective
         """
@@ -446,6 +451,21 @@ class Zhenxin_S_FC(gym.Env):
         reward = self.reward(self.cur_specs, self.specs_ideal)
         done = False
 
+        if self.env_steps < 20_000:
+            self.reward_idx = 0
+        elif self.env_steps > 20_000 and self.env_steps < 40_000:
+            self.reward_idx = 1
+        elif self.env_steps > 40_000 and self.env_steps < 60_000:
+            self.reward_idx = 2
+        elif self.env_steps > 60_000 and self.env_steps < 90_000:
+            self.reward_idx = 3
+        elif self.env_steps > 90_000 and self.env_steps < 120_000:
+            self.reward_idx = 4
+        elif self.env_steps > 120_000 and self.env_steps < 150_000:
+            self.reward_idx = 5
+        elif self.env_steps > 150_000:
+            self.reward_idx = 0
+
         # incentivize reaching goal state
         if reward >= 10:
             done = True
@@ -461,7 +481,12 @@ class Zhenxin_S_FC(gym.Env):
         )
         self.env_steps = self.env_steps + 1
 
-        logger.info("current specs:" + str(self.cur_specs) + ", reward: " + str(reward))
+        logger.info(
+            f"[{self.env_steps}] current specs:"
+            + str(self.cur_specs)
+            + ", reward: "
+            + str(reward)
+        )
         # writer.add_scalar('gain', self.cur_specs[0], self.env_steps)
         # writer.add_scalar('ugbw', self.cur_specs[1], self.env_steps)
         # writer.add_scalar('pm', self.cur_specs[2], self.env_steps)
@@ -496,19 +521,6 @@ class Zhenxin_S_FC(gym.Env):
         Returns:
             float: Either a negative penalty (-sum_of_violations) or 10 when the negated penalty is >= -0.02 (tolerance threshold).
         """
-        # rel_specs = self.lookup(spec, goal_spec)
-        # pos_val = []
-        # reward = 0.0
-        # for i, rel_spec in enumerate(rel_specs):
-        #     if self.specs_id[i] == "ibias_max":
-        #         rel_spec = rel_spec * -1.0  # /10.0
-        #     if rel_spec < 0:
-        #         reward += rel_spec
-        #         pos_val.append(0)
-        #     else:
-        #         pos_val.append(1)
-
-        # return reward if reward < -0.02 else 10
 
         norm_specs = self.lookup(spec, goal_spec)
 
@@ -516,9 +528,6 @@ class Zhenxin_S_FC(gym.Env):
         # but rather a penalty value for the optimization process
         reward = 0
         for i, rel_spec in enumerate(norm_specs):
-            # For power,  smaller is better
-            # For gain, larger (compared to the target/goal) is better
-            # For other specs (pm, ugbw, etc.), smaller is better
             assert self.specs_id[i] in ["ibias_max", "gain_min", "ugbw_min", "phm_min"]
             if self.specs_id[i] == "ibias_max" and rel_spec > 0:
                 reward += np.abs(rel_spec)  # /10
@@ -527,7 +536,45 @@ class Zhenxin_S_FC(gym.Env):
             elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
                 reward += np.abs(rel_spec)
         # return -reward
-        return -reward if -reward < -0.02 else 10
+        # return -reward if -reward < -0.02 else 10
+        self.ret_reward_0 = -reward if -reward < -0.02 else 10
+
+        def calc_reward(w):
+            total_reward = 0
+            for i, rel_spec in enumerate(norm_specs):
+                assert self.specs_id[i] in [
+                    "ibias_max",
+                    "gain_min",
+                    "ugbw_min",
+                    "phm_min",
+                ]
+                if self.specs_id[i] == "ibias_max" and rel_spec > 0:
+                    total_reward += w[3] * np.abs(rel_spec)
+                elif self.specs_id[i] == "gain_min" and rel_spec < 0:
+                    total_reward += w[0] * np.abs(rel_spec)
+                elif self.specs_id[i] != "ibias_max" and rel_spec < 0:
+                    if self.specs_id[i] == "ugbw_min":
+                        total_reward += w[1] * np.abs(rel_spec)
+                    elif self.specs_id[i] == "phm_min":
+                        total_reward += w[2] * np.abs(rel_spec)
+            return -total_reward if -total_reward < -0.02 else 10
+
+        self.ret_reward_1 = calc_reward([0, 10, 0, -5])
+        self.ret_reward_2 = calc_reward([8, 2, 0, -2])
+        self.ret_reward_3 = calc_reward([1, 2, 8, -2])
+        self.ret_reward_4 = calc_reward([3, 1, 0, -4])
+        self.ret_reward_5 = calc_reward([2, 2, 2, -1])
+
+        reward_map = {
+            0: self.ret_reward_0,
+            1: self.ret_reward_1,
+            2: self.ret_reward_2,
+            3: self.ret_reward_3,
+            4: self.ret_reward_4,
+            5: self.ret_reward_5,
+        }
+
+        return reward_map[self.reward_idx]
 
     def update(self, params_idx):
         """
