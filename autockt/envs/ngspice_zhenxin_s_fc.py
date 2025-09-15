@@ -300,7 +300,8 @@ class Zhenxin_S_FC(gym.Env):
         # objective number (used for validation)
         self.obj_idx = 0
 
-        self.reward_idx = 0
+        self.reward_idx = 1
+        self.last_change = 0
 
     def set_reward_fn(self, idx):
         self.reward_idx = idx
@@ -451,20 +452,24 @@ class Zhenxin_S_FC(gym.Env):
         reward = self.reward(self.cur_specs, self.specs_ideal)
         done = False
 
-        if self.env_steps < 20_000:
-            self.reward_idx = 0
-        elif self.env_steps > 20_000 and self.env_steps < 40_000:
-            self.reward_idx = 1
-        elif self.env_steps > 40_000 and self.env_steps < 60_000:
-            self.reward_idx = 2
-        elif self.env_steps > 60_000 and self.env_steps < 90_000:
-            self.reward_idx = 3
-        elif self.env_steps > 90_000 and self.env_steps < 120_000:
-            self.reward_idx = 4
-        elif self.env_steps > 120_000 and self.env_steps < 150_000:
-            self.reward_idx = 5
-        elif self.env_steps > 150_000:
-            self.reward_idx = 0
+        if self.last_change < 40_000:
+            self.last_change = self.last_change + 1
+        else:
+            self.last_change = 0
+            if self.reward_idx == 1 and self.cur_specs[-1] > 5000000:
+                self.reward_idx = 2
+
+            if self.reward_idx == 2 and self.cur_specs[0] > 1000:
+                self.reward_idx = 3
+
+            if self.reward_idx == 3 and self.cur_specs[-2] > 60:
+                self.reward_idx = 4
+
+            if self.reward_idx == 4 and self.cur_specs[1] < 0.01:
+                self.reward_idx = 5
+
+            if self.reward_idx == 5:
+                self.reward_idx = 5
 
         # incentivize reaching goal state
         if reward >= 10:
