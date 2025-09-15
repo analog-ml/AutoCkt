@@ -451,21 +451,6 @@ class Zhenxin_S_FC(gym.Env):
         reward = self.reward(self.cur_specs, self.specs_ideal)
         done = False
 
-        if self.env_steps < 20_000:
-            self.reward_idx = 0
-        elif self.env_steps > 20_000 and self.env_steps < 40_000:
-            self.reward_idx = 1
-        elif self.env_steps > 40_000 and self.env_steps < 60_000:
-            self.reward_idx = 2
-        elif self.env_steps > 60_000 and self.env_steps < 90_000:
-            self.reward_idx = 3
-        elif self.env_steps > 90_000 and self.env_steps < 120_000:
-            self.reward_idx = 4
-        elif self.env_steps > 120_000 and self.env_steps < 150_000:
-            self.reward_idx = 5
-        elif self.env_steps > 150_000:
-            self.reward_idx = 0
-
         # incentivize reaching goal state
         if reward >= 10:
             done = True
